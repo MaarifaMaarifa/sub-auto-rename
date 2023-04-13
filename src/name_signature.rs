@@ -209,15 +209,11 @@ mod tests {
 
     #[test]
     fn episode_name_signature_check_realmatch_test() {
-        let name_1 = OsStr::new("The Fresh Prince Of Bel-Air - S04 E01 - Where There's A Will, There's A Way, Part 1 (720p NF WebRip).mp4");
-        let name_2 = OsStr::new(
-            "The.fresh.prince.of.bel.air.S04E01.DVD-Rip JFKXVID.English-WWW.MY-SUBS.CO.srt",
-        );
+        let name_1 = OsStr::new("some.video.file.S04 E01.mp4");
+        let name_2 = OsStr::new("some.video.file.S04E01.srt");
 
-        let name_3 = OsStr::new("The Fresh Prince Of Bel-Air - S04 E10 - Home Is Where The Heart Attack Is (720p NF WebRip).mp4");
-        let name_4 = OsStr::new(
-            "The.fresh.prince.of.bel.air.S04E10.DVDRip.SAiNTS.English-WWW.MY-SUBS.CO.srt",
-        );
+        let name_3 = OsStr::new("some.video.file.S04 E10.mp4");
+        let name_4 = OsStr::new("some.video.file.S04E10.srt");
 
         let match_signature_1 = episode_name_signature_check(name_1, name_2);
         let match_signature_2 = episode_name_signature_check(name_3, name_4);
@@ -228,15 +224,11 @@ mod tests {
 
     #[test]
     fn episode_name_signature_check_realnomatch_failure_test() {
-        let name_1 = OsStr::new("The Fresh Prince Of Bel-Air - S04 E01 - Where There's A Will, There's A Way, Part 1 (720p NF WebRip).mp4");
-        let name_2 = OsStr::new(
-            "The.fresh.prince.of.bel.air.S04E01.DVD-Rip JFKXVID.English-WWW.MY-SUBS.CO.srt",
-        );
+        let name_1 = OsStr::new("some.video.file.S04 E01.mp4");
+        let name_2 = OsStr::new("some.video.file.S04E01.srt");
 
-        let name_3 = OsStr::new("The Fresh Prince Of Bel-Air - S04 E10 - Home Is Where The Heart Attack Is (720p NF WebRip).mp4");
-        let name_4 = OsStr::new(
-            "The.fresh.prince.of.bel.air.S04E10.DVDRip.SAiNTS.English-WWW.MY-SUBS.CO.srt",
-        );
+        let name_3 = OsStr::new("some.video.file.S04 E10.mp4");
+        let name_4 = OsStr::new("some.video.file.S04E10.srt");
 
         let match_signature_1 = episode_name_signature_check(name_1, name_3);
         let match_signature_2 = episode_name_signature_check(name_2, name_4);
