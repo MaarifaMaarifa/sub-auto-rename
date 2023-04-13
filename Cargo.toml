@@ -4,6 +4,7 @@ description = "A program that automatically renames subtitle files to their corr
 authors = ["Maarifa Maarifa"]
 categories = ['command-line-utilities', "movies", "tv", "subtitles"]
 repository = "https://github.com/sub-auto-rename"
+licence = "MIT"
 version = "0.1.0"
 edition = "2021"
 
