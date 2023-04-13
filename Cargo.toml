@@ -1,0 +1,18 @@
+[package]
+name = "sub-auto-rename"
+description = "A program that automatically renames subtitle files to their corresponding movie files names"
+authors = ["Maarifa Maarifa"]
+categories = ['command-line-utilities', "movies", "tv", "subtitles"]
+repository = "https://github.com/sub-auto-rename"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+thiserror = "1"
