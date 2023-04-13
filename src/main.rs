@@ -7,7 +7,7 @@ use sub_auto_rename::*;
 #[derive(Parser)]
 struct Cli {
     /// The directory where there are all the episodes and
-    /// and their corresponding subtile files
+    /// and their corresponding subtitle files
     episodes_subs_directory: path::PathBuf,
 
     /// Whether to ignore the difference in the number of files between subtitle files
