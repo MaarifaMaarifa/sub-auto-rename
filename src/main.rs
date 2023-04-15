@@ -47,10 +47,7 @@ fn main() -> Result<()> {
         ));
     }
 
-    for movie_file in movie_files.iter_mut() {
-        if movie_file.is_matched() {
-            continue;
-        }
+    for movie_file in movie_files.iter() {
         for subtitle_file in subtitle_files.iter_mut() {
             if subtitle_file.is_renamed() {
                 continue;

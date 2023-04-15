@@ -68,7 +68,7 @@ impl SubtitleFile {
     /// at episode Five
     pub fn rename_using_movie_file(
         &mut self,
-        movie_file: &mut MovieFile,
+        movie_file: &MovieFile,
     ) -> Result<(), SubtitleFileError> {
         let movie_name = movie_file.get_path();
         let subtitle_file_name = &self.subtitle_file_path;
@@ -83,7 +83,6 @@ impl SubtitleFile {
                 return Err(SubtitleFileError::FileSystem(err.to_string()));
             }
             self.renamed = true;
-            movie_file.matched();
             return Ok(());
         }
         Err(SubtitleFileError::MovieSubFileNamesMismatch)
@@ -115,7 +114,6 @@ pub enum MovieFileError {
 #[derive(Debug)]
 pub struct MovieFile {
     movie_file_path: path::PathBuf,
-    matched: bool,
 }
 
 impl MovieFile {
@@ -127,10 +125,7 @@ impl MovieFile {
     pub fn new(movie_file_path: path::PathBuf) -> Result<Self, MovieFileError> {
         if let Some(extension) = movie_file_path.extension() {
             if extension == "mkv" || extension == "mp4" {
-                return Ok(Self {
-                    movie_file_path,
-                    matched: false,
-                });
+                return Ok(Self { movie_file_path });
             }
         }
         Err(MovieFileError::InvalidMovieFileName)
@@ -139,16 +134,6 @@ impl MovieFile {
     /// Returns the path of the MovieFile
     fn get_path(&self) -> &path::Path {
         &self.movie_file_path
-    }
-
-    /// Sets the matched state of the movie file to true
-    fn matched(&mut self) {
-        self.matched = true;
-    }
-
-    /// Return true if the movie has been matched and vice versa
-    pub fn is_matched(&self) -> bool {
-        self.matched
     }
 }
 
