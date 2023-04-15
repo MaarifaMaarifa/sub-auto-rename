@@ -29,7 +29,7 @@ pub enum SubtitleFileError {
     MovieSubFileNamesMismatch,
 
     /// This error is returned when a error is return by fs::rename() function
-    #[error("There is a error related to the filesystem: (0)")]
+    #[error("There is an error related to the filesystem: (0)")]
     FileSystem(String),
 }
 
