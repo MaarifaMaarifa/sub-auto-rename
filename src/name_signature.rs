@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 
+/// Whether or not Episode signature matches
 #[derive(Debug, PartialEq)]
 pub enum MatchSignature {
     Match,
