@@ -72,13 +72,11 @@ impl SignatureRange {
     /// Get a section of a str that has the range a SignatureRange self as a String
     fn get_section_from_str(&self, string: &str) -> String {
         let range_diff = self.1 - self.0;
-        let mut string_section = String::new();
         string
             .chars()
             .skip(self.0)
             .take(range_diff)
-            .for_each(|char| string_section.push(char));
-        string_section
+            .collect::<String>()
     }
 }
 
