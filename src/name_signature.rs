@@ -136,59 +136,63 @@ fn signature_range(signature_type: SignatureType, name: &str) -> Option<Signatur
 mod tests {
     use super::*;
 
-    #[test]
-    fn signature_range_fn_test() {
-        let expected_season_range = SignatureRange(5, 7);
-        let expected_episode_range = SignatureRange(8, 10);
-        let name = "Hellos01e02.mp4";
+    mod signature_range_fn_tests {
+        use super::*;
 
-        assert_eq!(
-            signature_range(SignatureType::Season, &name),
-            Some(expected_season_range)
-        );
-        assert_eq!(
-            signature_range(SignatureType::Episode, &name),
-            Some(expected_episode_range)
-        );
-    }
+        #[test]
+        fn signature_range_fn_test() {
+            let expected_season_range = SignatureRange(5, 7);
+            let expected_episode_range = SignatureRange(8, 10);
+            let name = "Hellos01e02.mp4";
 
-    #[test]
-    fn signature_range_fn_with_space_test() {
-        let expected_season_range = SignatureRange(5, 7);
-        let expected_episode_range = SignatureRange(9, 11);
-        let name = "Hellos01 e02.mp4";
+            assert_eq!(
+                signature_range(SignatureType::Season, &name),
+                Some(expected_season_range)
+            );
+            assert_eq!(
+                signature_range(SignatureType::Episode, &name),
+                Some(expected_episode_range)
+            );
+        }
 
-        assert_eq!(
-            signature_range(SignatureType::Season, &name),
-            Some(expected_season_range)
-        );
-        assert_eq!(
-            signature_range(SignatureType::Episode, &name),
-            Some(expected_episode_range)
-        );
-    }
+        #[test]
+        fn signature_range_fn_with_space_test() {
+            let expected_season_range = SignatureRange(5, 7);
+            let expected_episode_range = SignatureRange(9, 11);
+            let name = "Hellos01 e02.mp4";
 
-    #[test]
-    fn signature_range_without_extension_fn_test() {
-        let expected_season_range = SignatureRange(5, 7);
-        let expected_episode_range = SignatureRange(8, 10);
-        let name = "Hellos01e02";
+            assert_eq!(
+                signature_range(SignatureType::Season, &name),
+                Some(expected_season_range)
+            );
+            assert_eq!(
+                signature_range(SignatureType::Episode, &name),
+                Some(expected_episode_range)
+            );
+        }
 
-        assert_eq!(
-            signature_range(SignatureType::Season, &name).unwrap(),
-            expected_season_range
-        );
-        assert_eq!(
-            signature_range(SignatureType::Episode, &name).unwrap(),
-            expected_episode_range
-        );
-    }
+        #[test]
+        fn signature_range_without_extension_fn_test() {
+            let expected_season_range = SignatureRange(5, 7);
+            let expected_episode_range = SignatureRange(8, 10);
+            let name = "Hellos01e02";
 
-    #[test]
-    #[should_panic]
-    fn signature_range_fn_failure_test() {
-        let name = "Hellos01.mp4";
-        signature_range(SignatureType::Episode, &name).unwrap();
+            assert_eq!(
+                signature_range(SignatureType::Season, &name).unwrap(),
+                expected_season_range
+            );
+            assert_eq!(
+                signature_range(SignatureType::Episode, &name).unwrap(),
+                expected_episode_range
+            );
+        }
+
+        #[test]
+        #[should_panic]
+        fn signature_range_fn_failure_test() {
+            let name = "Hellos01.mp4";
+            signature_range(SignatureType::Episode, &name).unwrap();
+        }
     }
 
     #[test]
