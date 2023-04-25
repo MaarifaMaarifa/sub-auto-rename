@@ -153,6 +153,22 @@ mod tests {
     }
 
     #[test]
+    fn signature_range_fn_with_space_test() {
+        let expected_season_range = SignatureRange(5, 7);
+        let expected_episode_range = SignatureRange(9, 11);
+        let name = "Hellos01 e02.mp4";
+
+        assert_eq!(
+            signature_range(SignatureType::Season, &name),
+            Some(expected_season_range)
+        );
+        assert_eq!(
+            signature_range(SignatureType::Episode, &name),
+            Some(expected_episode_range)
+        );
+    }
+
+    #[test]
     fn signature_range_without_extension_fn_test() {
         let expected_season_range = SignatureRange(5, 7);
         let expected_episode_range = SignatureRange(8, 10);
