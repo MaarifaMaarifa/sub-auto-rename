@@ -1,5 +1,29 @@
 use std::ffi::OsStr;
 
+/// # Signature for Season/Episode Segment in the file name
+///
+/// This makes it easy to obtain the aqual value of season and episode in the given
+/// filename string 
+struct Signature<'a> {
+    sig_str: &'a str,
+}
+
+impl<'a> Signature<'a> {
+    /// Constructs a new signature
+    fn new(sig_str: &'a str) -> Self {
+        Self { sig_str }
+    }
+
+    /// Obtain the actual value of the signature
+    fn get_value(&self) -> u32 {
+        let val_str: String = self.sig_str.chars().skip(1).collect();
+
+        // SAFETY: We expect the signature str to be valid hence characters that
+        // would follow after that are expected to be numbers hence unwrap
+        val_str.parse().unwrap()
+    }
+}
+
 /// Whether or not Episode signature matches
 #[derive(Debug, PartialEq)]
 pub enum MatchSignature {
@@ -28,8 +52,8 @@ pub fn episode_name_signature_check(first_name: &OsStr, second_name: &OsStr) -> 
     let second_name_season_string = second_name_season_range.get_section_from_str(&second_name);
     let second_name_episode_string = second_name_episode_range.get_section_from_str(&second_name);
 
-    if first_name_episode_string == second_name_episode_string
-        && first_name_season_string == second_name_season_string
+    if Signature::new(&first_name_episode_string).get_value() == Signature::new(&second_name_episode_string).get_value()
+        && Signature::new(&first_name_season_string).get_value() == Signature::new(&second_name_season_string).get_value()
     {
         MatchSignature::Match
     } else {
@@ -275,5 +299,17 @@ mod tests {
 
         assert_eq!(match_signature_1, MatchSignature::NoMatch);
         assert_eq!(match_signature_2, MatchSignature::NoMatch);
+    }
+
+    #[test]
+    fn signature_get_value_test() {
+        let sig_str_season = "s09";
+        let sig_str_episode = "e24";
+
+        let season_signature = Signature::new(sig_str_season);
+        let episode_signature = Signature::new(sig_str_episode);
+
+        assert_eq!(season_signature.get_value(), 9);
+        assert_eq!(episode_signature.get_value(), 24);
     }
 }
