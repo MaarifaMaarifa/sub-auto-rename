@@ -1,29 +1,5 @@
 use std::ffi::OsStr;
 
-/// # Signature for Season/Episode Segment in the file name
-///
-/// This makes it easy to obtain the aqual value of season and episode in the given
-/// filename string 
-struct Signature<'a> {
-    sig_str: &'a str,
-}
-
-impl<'a> Signature<'a> {
-    /// Constructs a new signature
-    fn new(sig_str: &'a str) -> Self {
-        Self { sig_str }
-    }
-
-    /// Obtain the actual value of the signature
-    fn get_value(&self) -> u32 {
-        let val_str: String = self.sig_str.chars().skip(1).collect();
-
-        // SAFETY: We expect the signature str to be valid hence characters that
-        // would follow after that are expected to be numbers hence unwrap
-        val_str.parse().unwrap()
-    }
-}
-
 /// Whether or not Episode signature matches
 #[derive(Debug, PartialEq)]
 pub enum MatchSignature {
@@ -37,70 +13,33 @@ pub fn episode_name_signature_check(first_name: &OsStr, second_name: &OsStr) -> 
     let first_name = first_name.to_string_lossy().to_string().to_lowercase();
     let second_name = second_name.to_string_lossy().to_string().to_lowercase();
 
-    let first_name_sig_ranges = get_season_episode_sig_range(&first_name);
-    let second_name_sig_ranges = get_season_episode_sig_range(&second_name);
+    let first_name_season = get_signature_value(SignatureType::Season, &first_name);
+    let first_name_episode = get_signature_value(SignatureType::Episode, &first_name);
+    let second_name_season = get_signature_value(SignatureType::Season, &second_name);
+    let second_name_episode = get_signature_value(SignatureType::Episode, &second_name);
 
-    if first_name_sig_ranges.is_none() || second_name_sig_ranges.is_none() {
-        return MatchSignature::NoMatch;
+    let mut seasons_matched = false;
+    let mut episodes_matched = false;
+
+    if let Some(first_name_season) = first_name_season {
+        if let Some(second_name_season) = second_name_season {
+            if first_name_season == second_name_season {
+                seasons_matched = true
+            }
+        }
+    }
+    if let Some(first_name_episode) = first_name_episode {
+        if let Some(second_name_episode) = second_name_episode {
+            if first_name_episode == second_name_episode {
+                episodes_matched = true
+            }
+        }
     }
 
-    let (first_name_season_range, first_name_episode_range) = first_name_sig_ranges.unwrap();
-    let (second_name_season_range, second_name_episode_range) = second_name_sig_ranges.unwrap();
-
-    let first_name_season_string = first_name_season_range.get_section_from_str(&first_name);
-    let first_name_episode_string = first_name_episode_range.get_section_from_str(&first_name);
-    let second_name_season_string = second_name_season_range.get_section_from_str(&second_name);
-    let second_name_episode_string = second_name_episode_range.get_section_from_str(&second_name);
-
-    if Signature::new(&first_name_episode_string).get_value() == Signature::new(&second_name_episode_string).get_value()
-        && Signature::new(&first_name_season_string).get_value() == Signature::new(&second_name_season_string).get_value()
-    {
+    if seasons_matched && episodes_matched {
         MatchSignature::Match
     } else {
         MatchSignature::NoMatch
-    }
-}
-
-/// Returns the Season Signature range and Episode signature range as a Optional tuple on the provided file name string
-/// of the signature someepisodeS02E01
-fn get_season_episode_sig_range(name: &str) -> Option<(SignatureRange, SignatureRange)> {
-    if let Some(season_sig_range) = signature_range(SignatureType::Season, name) {
-        signature_range(SignatureType::Episode, name)
-            .map(|episode_sig_range| (season_sig_range, episode_sig_range))
-    } else {
-        None
-    }
-}
-
-/// Struct representing the range of season or episode signature
-/// Let's say you are given name someepisodeS02E01, it's season range will cover S02
-/// and it's episode range will cover E01
-///
-/// # Point to note
-/// This range is inclusive
-#[derive(Debug, PartialEq)]
-struct SignatureRange(usize, usize);
-
-impl SignatureRange {
-    /// Create a new instance of signatureRange
-    ///
-    /// # Panics
-    /// This method panics when start is greater than end
-    fn new(start: usize, end: usize) -> Self {
-        if start > end {
-            panic!("start is greater than end. start: {}, end: {}", start, end)
-        }
-        Self(start, end)
-    }
-
-    /// Get a section of a str that has the range a SignatureRange self as a String
-    fn get_section_from_str(&self, string: &str) -> String {
-        let range_diff = self.1 - self.0;
-        string
-            .chars()
-            .skip(self.0)
-            .take(range_diff)
-            .collect::<String>()
     }
 }
 
@@ -109,151 +48,33 @@ enum SignatureType {
     Episode,
 }
 
-/// Returns a Signature range on the provided name based on Signature type provided
-/// i.e of season or episode
-fn signature_range(signature_type: SignatureType, name: &str) -> Option<SignatureRange> {
+/// Returns the value of season/episode in the given string, this is specified
+/// via it's signature type parameter
+fn get_signature_value(signature_type: SignatureType, name: &str) -> Option<u32> {
     let char_to_check = match signature_type {
         SignatureType::Season => 's',
         SignatureType::Episode => 'e',
     };
 
-    let mut start: Option<usize> = None;
-    let mut end: Option<usize> = None;
+    let mut value = None;
 
-    name.split(char_to_check)
-        .take_while(|chunk| {
-            let last_numeric_index = chunk.chars().take_while(|x| x.is_numeric()).count();
+    for chunk in name.split(char_to_check) {
+        let value_str: String = chunk.chars().take_while(|x| x.is_numeric()).collect();
 
-            if last_numeric_index != 0 {
-                end = Some(last_numeric_index)
-            }
-            end.is_none()
-        })
-        .for_each(|chunk| {
-            if let Some(ref mut val) = start {
-                *val += chunk.len() + 1
-            } else {
-                start = Some(chunk.len())
-            }
-        });
-
-    if let Some(start) = start {
-        if let Some(end) = end {
-            return Some(SignatureRange::new(start, end + start))
+        if !value_str.is_empty() {
+            // SAFETY: all the characters in the string have been checked if they are numeric
+            // hence calling unwrap here is safe
+            value = Some(value_str.parse::<u32>().unwrap());
+            break
         }
     }
-    None
+
+    value
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    mod signature_range_fn_tests {
-        use super::*;
-
-        #[test]
-        fn signature_range_fn_test() {
-            let expected_season_range = SignatureRange(5, 7);
-            let expected_episode_range = SignatureRange(8, 10);
-            let name = "Hellos01e02.mp4";
-
-            assert_eq!(
-                signature_range(SignatureType::Season, &name),
-                Some(expected_season_range)
-            );
-            assert_eq!(
-                signature_range(SignatureType::Episode, &name),
-                Some(expected_episode_range)
-            );
-        }
-
-        #[test]
-        fn signature_range_fn_with_space_test() {
-            let expected_season_range = SignatureRange(5, 7);
-            let expected_episode_range = SignatureRange(9, 11);
-            let name = "Hellos01 e02.mp4";
-
-            assert_eq!(
-                signature_range(SignatureType::Season, &name),
-                Some(expected_season_range)
-            );
-            assert_eq!(
-                signature_range(SignatureType::Episode, &name),
-                Some(expected_episode_range)
-            );
-        }
-
-        #[test]
-        fn signature_range_without_extension_fn_test() {
-            let expected_season_range = SignatureRange(5, 7);
-            let expected_episode_range = SignatureRange(8, 10);
-            let name = "Hellos01e02";
-
-            assert_eq!(
-                signature_range(SignatureType::Season, &name).unwrap(),
-                expected_season_range
-            );
-            assert_eq!(
-                signature_range(SignatureType::Episode, &name).unwrap(),
-                expected_episode_range
-            );
-        }
-
-        #[test]
-        #[should_panic]
-        fn signature_range_fn_failure_test() {
-            let name = "Hellos01.mp4";
-            signature_range(SignatureType::Episode, &name).unwrap();
-        }
-
-        #[test]
-        fn signature_range_fn_with_many_s_test() {
-            let expected_season_range = SignatureRange(5, 7);
-            let expected_episode_range = SignatureRange(9, 11);
-            let name = "hellss01 e02.mp4";
-
-            assert_eq!(
-                signature_range(SignatureType::Season, &name),
-                Some(expected_season_range)
-            );
-            assert_eq!(
-                signature_range(SignatureType::Episode, &name),
-                Some(expected_episode_range)
-            );
-        }
-
-        #[test]
-        fn signature_range_fn_with_many_e_test() {
-            let expected_season_range = SignatureRange(5, 7);
-            let expected_episode_range = SignatureRange(9, 11);
-            let name = "helees01 e02.mp4";
-
-            assert_eq!(
-                signature_range(SignatureType::Season, &name),
-                Some(expected_season_range)
-            );
-            assert_eq!(
-                signature_range(SignatureType::Episode, &name),
-                Some(expected_episode_range)
-            );
-        }
-    }
-
-    #[test]
-    fn get_section_from_str_test() {
-        let season_range = SignatureRange(5, 8);
-        let episode_range = SignatureRange(8, 11);
-        let expected_season_signature = "s01";
-        let expected_episode_signature = "e02";
-        let name = "Hellos01e02.mp4";
-
-        let season_signature = season_range.get_section_from_str(&name);
-        let episode_signature = episode_range.get_section_from_str(&name);
-
-        assert_eq!(season_signature, expected_season_signature);
-        assert_eq!(episode_signature, expected_episode_signature);
-    }
 
     #[test]
     fn episode_name_signature_check_test() {
@@ -302,14 +123,13 @@ mod tests {
     }
 
     #[test]
-    fn signature_get_value_test() {
-        let sig_str_season = "s09";
-        let sig_str_episode = "e24";
-
-        let season_signature = Signature::new(sig_str_season);
-        let episode_signature = Signature::new(sig_str_episode);
-
-        assert_eq!(season_signature.get_value(), 9);
-        assert_eq!(episode_signature.get_value(), 24);
+    fn get_signature_val_for_episode_test() {
+        let file_str = "hellos01e23.mov";
+        assert_eq!(get_signature_value(SignatureType::Episode, file_str).unwrap(), 23);
+    }
+    #[test]
+    fn get_signature_val_for_season_test() {
+        let file_str = "hellos01e23.mov";
+        assert_eq!(get_signature_value(SignatureType::Season, file_str).unwrap(), 1);
     }
 }
