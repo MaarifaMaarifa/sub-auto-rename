@@ -41,24 +41,6 @@ pub struct SubtitleFile {
 }
 
 impl SubtitleFile {
-    /// Creates a new instance of SubtitleFile making sure that the provided path
-    /// has the subtitle file name extension
-    ///
-    /// # Error
-    /// This method returns an error when th provided path does not have a valid
-    /// subtitle file extension.
-    pub fn new(subtitle_file_path: path::PathBuf) -> Result<Self, SubtitleFileError> {
-        if let Some(extension) = subtitle_file_path.extension() {
-            if extension == "srt" {
-                return Ok(Self {
-                    subtitle_file_path,
-                    renamed: false,
-                });
-            }
-        }
-        Err(SubtitleFileError::InvalidSubtileFileName)
-    }
-
     /// Renames the subtitle file using the name of a movie file
     ///
     /// # Errors
@@ -94,6 +76,22 @@ impl SubtitleFile {
     }
 }
 
+impl TryFrom<path::PathBuf> for SubtitleFile {
+    type Error = SubtitleFileError;
+
+    fn try_from(value: path::PathBuf) -> std::result::Result<Self, Self::Error> {
+        if let Some(extension) = value.extension() {
+            if extension == "srt" {
+                return Ok(Self {
+                    subtitle_file_path: value,
+                    renamed: false,
+                });
+            }
+        }
+        Err(SubtitleFileError::InvalidSubtileFileName)
+    }
+}
+
 impl std::fmt::Display for SubtitleFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let path_to_display = self.subtitle_file_path.to_string_lossy();
@@ -112,34 +110,31 @@ pub enum MovieFileError {
 
 /// Struct representing a movie file
 #[derive(Debug)]
-pub struct MovieFile {
-    movie_file_path: path::PathBuf,
-}
+pub struct MovieFile(path::PathBuf);
 
 impl MovieFile {
-    /// Creates a new instance of MovieFile
-    ///
-    /// # Errors
-    /// This method will return an error when the path passed does not have a valid movie
-    /// extension ie .mp4, mkv
-    pub fn new(movie_file_path: path::PathBuf) -> Result<Self, MovieFileError> {
-        if let Some(extension) = movie_file_path.extension() {
+    /// Returns the path of the MovieFile
+    fn get_path(&self) -> &path::Path {
+        &self.0
+    }
+}
+
+impl TryFrom<path::PathBuf> for MovieFile {
+    type Error = MovieFileError;
+
+    fn try_from(value: path::PathBuf) -> std::result::Result<Self, Self::Error> {
+        if let Some(extension) = value.extension() {
             if extension == "mkv" || extension == "mp4" {
-                return Ok(Self { movie_file_path });
+                return Ok(Self(value));
             }
         }
         Err(MovieFileError::InvalidMovieFileName)
-    }
-
-    /// Returns the path of the MovieFile
-    fn get_path(&self) -> &path::Path {
-        &self.movie_file_path
     }
 }
 
 impl std::fmt::Display for MovieFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let path_to_display = self.movie_file_path.to_string_lossy();
+        let path_to_display = self.0.to_string_lossy();
         write!(f, "{}", path_to_display)
     }
 }

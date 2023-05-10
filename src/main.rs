@@ -30,12 +30,12 @@ fn main() -> Result<()> {
             continue;
         };
 
-        if let Ok(movie_file) = MovieFile::new(dir_entry.path()) {
+        if let Ok(movie_file) = MovieFile::try_from(dir_entry.path()) {
             movie_files.push(movie_file);
             continue;
         };
 
-        if let Ok(subtitle_file) = SubtitleFile::new(dir_entry.path()) {
+        if let Ok(subtitle_file) = SubtitleFile::try_from(dir_entry.path()) {
             subtitle_files.push(subtitle_file);
         };
     }
