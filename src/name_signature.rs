@@ -93,42 +93,33 @@ fn signature_range(signature_type: SignatureType, name: &str) -> Option<Signatur
         SignatureType::Episode => 'e',
     };
 
-    let mut name_chars_iter = name.chars().enumerate();
+    let char_chunks = name.split(char_to_check);
 
-    let mut number_found = false;
-    let mut s_start_index: Option<usize> = None;
-    let mut s_end_index: Option<usize> = None;
+    let mut start: Option<usize> = None;
+    let mut end: Option<usize> = None;
 
-    while let Some((outer_index, char)) = name_chars_iter.next() {
-        if char == char_to_check {
-            if let Some((_, char)) = name_chars_iter.next() {
-                if char.is_numeric() {
-                    s_start_index = Some(outer_index);
-                    continue;
-                }
+    char_chunks
+        .take_while(|chunk| {
+            let last_numeric_index = chunk.chars().take_while(|x| x.is_numeric()).count();
+
+            if last_numeric_index != 0 {
+                end = Some(last_numeric_index)
             }
-        }
+            end.is_none()
+        })
+        .for_each(|chunk| {
+            if let Some(ref mut val) = start {
+                *val += chunk.len() + 1
+            } else {
+                start = Some(chunk.len())
+            }
+        });
 
-        if s_start_index.is_some() && char.is_numeric() {
-            number_found = true;
-            continue;
-        }
-
-        if s_start_index.is_some() && !char.is_numeric() && number_found {
-            s_end_index = Some(outer_index - 1);
-            break;
+    if let Some(start) = start {
+        if let Some(end) = end {
+            return Some(SignatureRange::new(start, end + start))
         }
     }
-
-    if s_start_index.is_some() && s_end_index.is_some() {
-        return Some(SignatureRange::new(
-            s_start_index.unwrap(),
-            s_end_index.unwrap(),
-        ));
-    } else if s_start_index.is_some() && name_chars_iter.next().is_none() {
-        return Some(SignatureRange::new(s_start_index.unwrap(), name.len() - 1));
-    }
-
     None
 }
 
@@ -192,6 +183,38 @@ mod tests {
         fn signature_range_fn_failure_test() {
             let name = "Hellos01.mp4";
             signature_range(SignatureType::Episode, &name).unwrap();
+        }
+
+        #[test]
+        fn signature_range_fn_with_many_s_test() {
+            let expected_season_range = SignatureRange(5, 7);
+            let expected_episode_range = SignatureRange(9, 11);
+            let name = "hellss01 e02.mp4";
+
+            assert_eq!(
+                signature_range(SignatureType::Season, &name),
+                Some(expected_season_range)
+            );
+            assert_eq!(
+                signature_range(SignatureType::Episode, &name),
+                Some(expected_episode_range)
+            );
+        }
+
+        #[test]
+        fn signature_range_fn_with_many_e_test() {
+            let expected_season_range = SignatureRange(5, 7);
+            let expected_episode_range = SignatureRange(9, 11);
+            let name = "helees01 e02.mp4";
+
+            assert_eq!(
+                signature_range(SignatureType::Season, &name),
+                Some(expected_season_range)
+            );
+            assert_eq!(
+                signature_range(SignatureType::Episode, &name),
+                Some(expected_episode_range)
+            );
         }
     }
 
