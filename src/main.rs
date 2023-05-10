@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{bail, Result};
 use clap::Parser;
 use std::fs;
 use std::path;
@@ -40,11 +40,11 @@ fn main() -> Result<()> {
     }
 
     if !cli.ignore_number_difference && movie_files.len() != subtitle_files.len() {
-        return Err(anyhow!(
+        bail!(
             "Total movie files are not the same as total subtitle files. Movies: {}, Subtitles: {}",
             movie_files.len(),
             subtitle_files.len(),
-        ));
+        );
     }
 
     for movie_file in movie_files.iter() {
@@ -55,7 +55,7 @@ fn main() -> Result<()> {
             if let Err(SubtitleFileError::FileSystem(err)) =
                 subtitle_file.rename_using_movie_file(movie_file)
             {
-                return Err(anyhow!(err));
+                bail!(err);
             } else {
                 println!("Renamed subtitle file {}", subtitle_file);
                 break;
