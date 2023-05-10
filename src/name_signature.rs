@@ -93,12 +93,10 @@ fn signature_range(signature_type: SignatureType, name: &str) -> Option<Signatur
         SignatureType::Episode => 'e',
     };
 
-    let char_chunks = name.split(char_to_check);
-
     let mut start: Option<usize> = None;
     let mut end: Option<usize> = None;
 
-    char_chunks
+    name.split(char_to_check)
         .take_while(|chunk| {
             let last_numeric_index = chunk.chars().take_while(|x| x.is_numeric()).count();
 
