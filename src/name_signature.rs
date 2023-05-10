@@ -65,7 +65,7 @@ fn get_signature_value(signature_type: SignatureType, name: &str) -> Option<u32>
             // SAFETY: all the characters in the string have been checked if they are numeric
             // hence calling unwrap here is safe
             value = Some(value_str.parse::<u32>().unwrap());
-            break
+            break;
         }
     }
 
@@ -125,11 +125,17 @@ mod tests {
     #[test]
     fn get_signature_val_for_episode_test() {
         let file_str = "hellos01e23.mov";
-        assert_eq!(get_signature_value(SignatureType::Episode, file_str).unwrap(), 23);
+        assert_eq!(
+            get_signature_value(SignatureType::Episode, file_str).unwrap(),
+            23
+        );
     }
     #[test]
     fn get_signature_val_for_season_test() {
         let file_str = "hellos01e23.mov";
-        assert_eq!(get_signature_value(SignatureType::Season, file_str).unwrap(), 1);
+        assert_eq!(
+            get_signature_value(SignatureType::Season, file_str).unwrap(),
+            1
+        );
     }
 }

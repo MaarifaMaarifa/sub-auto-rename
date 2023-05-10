@@ -5,6 +5,7 @@ use std::path;
 use sub_auto_rename::*;
 
 #[derive(Parser)]
+#[command(author, version, about)]
 struct Cli {
     /// The directory where there are all the episodes and
     /// and their corresponding subtitle files
