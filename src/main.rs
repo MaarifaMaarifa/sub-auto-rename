@@ -65,6 +65,7 @@ fn main() -> Result<()> {
             if let Err(err) = subtitle_file.rename_using_movie_file(movie_file) {
                 if let SubtitleFileError::FileSystem(err) = err {
                     log::error!("{}", err);
+                    log::warn!("Skipping '{}' due to previous error", subtitle_file);
                 }
             } else {
                 println!("Renamed subtitle file {}", subtitle_file);
