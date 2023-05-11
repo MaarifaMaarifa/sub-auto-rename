@@ -40,7 +40,6 @@ pub enum SubtitleFileError {
 #[derive(Debug)]
 pub struct SubtitleFile {
     subtitle_file_path: path::PathBuf,
-    renamed: bool,
 }
 
 impl SubtitleFile {
@@ -51,10 +50,7 @@ impl SubtitleFile {
     /// when the subtitle file name and the movie file name have no matching season and episode
     /// signatures, that is the word S01EO5 that imply that the files are of the First season
     /// at episode Five
-    pub fn rename_using_movie_file(
-        &mut self,
-        movie_file: &MovieFile,
-    ) -> Result<(), SubtitleFileError> {
+    pub fn rename_using_movie_file(&self, movie_file: &MovieFile) -> Result<(), SubtitleFileError> {
         if let MatchSignature::Match = episode_name_signature_check(
             movie_file.get_path().as_os_str(),
             self.subtitle_file_path.as_os_str(),
@@ -65,15 +61,9 @@ impl SubtitleFile {
             if let Err(err) = fs::rename(&self.subtitle_file_path, new_subtitle_file_name) {
                 return Err(SubtitleFileError::FileSystem(err.to_string()));
             }
-            self.renamed = true;
             return Ok(());
         }
         Err(SubtitleFileError::MovieSubFileNamesMismatch)
-    }
-
-    /// Returns true if the subtitle file is already renamed and vice versa
-    pub fn is_renamed(&self) -> bool {
-        self.renamed
     }
 }
 
@@ -85,7 +75,6 @@ impl TryFrom<path::PathBuf> for SubtitleFile {
             if extension == SUBTITLE_FILE_EXTENSION {
                 return Ok(Self {
                     subtitle_file_path: value,
-                    renamed: false,
                 });
             }
         }
