@@ -61,25 +61,29 @@ fn main() -> Result<()> {
     // keeping track of what subtitle file to remove from the vec after being renamed for efficiency
     let mut subtitle_file_index_to_remove: Option<usize> = None;
 
-    for movie_file in movie_files.iter() {
-        for (index, subtitle_file) in subtitle_files.iter().enumerate() {
-            if let Err(err) = subtitle_file.rename_using_movie_file(movie_file) {
-                if let SubtitleFileError::FileSystem(err) = err {
-                    log::error!("{}", err);
-                    log::warn!("Skipping '{}' due to previous error", subtitle_file);
+    movie_files.iter().for_each(|movie_file| {
+        subtitle_files
+            .iter()
+            .enumerate()
+            .any(|(index, subtitle_file)| {
+                if let Err(err) = subtitle_file.rename_using_movie_file(movie_file) {
+                    if let SubtitleFileError::FileSystem(err) = err {
+                        log::error!("{}", err);
+                        log::warn!("Skipping '{}' due to previous error", subtitle_file);
+                    }
+                    false
+                } else {
+                    println!("{} Renamed subtitle file '{}'", "->".green(), subtitle_file);
+                    subtitle_file_index_to_remove = Some(index);
+                    true
                 }
-            } else {
-                println!("{} Renamed subtitle file '{}'", "->".green(), subtitle_file);
-                subtitle_file_index_to_remove = Some(index);
-                break;
-            }
-        }
+            });
 
         if let Some(index) = subtitle_file_index_to_remove {
             subtitle_files.swap_remove(index);
             subtitle_file_index_to_remove = None;
         }
-    }
+    });
 
     println!(
         "{}",
