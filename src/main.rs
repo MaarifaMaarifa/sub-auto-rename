@@ -53,6 +53,8 @@ fn main() -> Result<()> {
         );
     }
 
+    let subtitle_files_before_rename = subtitle_files.len();
+
     // keeping track of what subtitle file to remove from the vec after being renamed for efficiency
     let mut subtitle_file_index_to_remove: Option<usize> = None;
 
@@ -74,6 +76,11 @@ fn main() -> Result<()> {
             subtitle_file_index_to_remove = None;
         }
     }
+
+    println!(
+        "Total subtitle files renamed: {}",
+        subtitle_files_before_rename - subtitle_files.len()
+    );
 
     Ok(())
 }
