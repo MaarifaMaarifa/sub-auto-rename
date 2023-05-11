@@ -33,7 +33,9 @@ fn main() -> Result<()> {
             continue;
         };
 
-        if let Ok(movie_file) = MovieFile::new(dir_entry.path(), cli.extra_movie_extensions.as_ref()) {
+        if let Some(movie_file) =
+            MovieFile::new(dir_entry.path(), cli.extra_movie_extensions.as_ref())
+        {
             movie_files.push(movie_file);
             continue;
         };

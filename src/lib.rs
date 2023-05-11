@@ -100,15 +100,6 @@ impl std::fmt::Display for SubtitleFile {
     }
 }
 
-/// Error that can be returned when performing operations related to a movie file
-#[derive(Debug, Error)]
-pub enum MovieFileError {
-    /// This error is returned when trying to create a movie instance while the provided
-    /// path does not have a movie extension, that is .mp4 or .mkv etc
-    #[error("The movie name does not end with a valid movie extensions")]
-    InvalidMovieFileName,
-}
-
 /// Struct representing a movie file
 #[derive(Debug)]
 pub struct MovieFile(path::PathBuf);
@@ -118,15 +109,9 @@ impl MovieFile {
     ///
     /// This method takes an optional vec of extensions to include when constructing
     /// the MoviesFile, otherwise when the argument is None it will default to the
-    /// built in extension
-    ///
-    /// # Errors
-    /// This method return an error when trying to construct a MovieFile with an
-    /// unknown extension.
-    pub fn new(
-        value: path::PathBuf,
-        extra_extensions: Option<&Vec<String>>,
-    ) -> Result<Self, MovieFileError> {
+    /// built in extension.
+    /// Returns None when the path provided is of unknown extension
+    pub fn new(value: path::PathBuf, extra_extensions: Option<&Vec<String>>) -> Option<Self> {
         if let Some(extension) = value.extension() {
             // Checking the extra extensions first
             if let Some(extra_extensions) = extra_extensions {
@@ -134,15 +119,15 @@ impl MovieFile {
                     .iter()
                     .any(|val| *val == extension.to_string_lossy().to_string())
                 {
-                    return Ok(Self(value));
+                    return Some(Self(value));
                 }
             }
             // Checking the default extensions when no extra extensions are provided
             if MOVIE_FILE_EXTENSIONS.iter().any(|val| *val == extension) {
-                return Ok(Self(value));
+                return Some(Self(value));
             }
         }
-        Err(MovieFileError::InvalidMovieFileName)
+        None
     }
 
     /// Returns the path of the MovieFile
@@ -160,11 +145,9 @@ impl std::fmt::Display for MovieFile {
 
 #[cfg(test)]
 mod tests {
-    use std::path;
-
-    use crate::MOVIE_FILE_EXTENSIONS;
-
     use super::MovieFile;
+    use crate::MOVIE_FILE_EXTENSIONS;
+    use std::path;
 
     #[test]
     fn movie_file_creation_with_default_extension_test() {
@@ -175,7 +158,7 @@ mod tests {
 
         let total_movie_files_created = movie_paths
             .iter()
-            .take_while(|path| MovieFile::new(path.into(), None).is_ok())
+            .take_while(|path| MovieFile::new(path.into(), None).is_some())
             .count();
 
         assert_eq!(total_movie_files_created, movie_paths.len())
@@ -192,7 +175,7 @@ mod tests {
 
         let total_movie_files_created = movie_paths
             .iter()
-            .take_while(|path| MovieFile::new(path.into(), Some(&extra_extension)).is_ok())
+            .take_while(|path| MovieFile::new(path.into(), Some(&extra_extension)).is_some())
             .count();
 
         assert_eq!(total_movie_files_created, movie_paths.len())
