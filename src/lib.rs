@@ -117,7 +117,7 @@ impl MovieFile {
             if let Some(extra_extensions) = extra_extensions {
                 if extra_extensions
                     .iter()
-                    .any(|val| *val == extension.to_string_lossy().to_string())
+                    .any(|val| *val == extension.to_string_lossy())
                 {
                     return Some(Self(value));
                 }
