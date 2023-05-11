@@ -67,9 +67,15 @@ fn main() -> Result<()> {
             .enumerate()
             .any(|(index, subtitle_file)| {
                 if let Err(err) = subtitle_file.rename_using_movie_file(movie_file) {
-                    if let SubtitleFileError::FileSystem(err) = err {
-                        log::error!("{}", err);
-                        log::warn!("Skipping '{}' due to previous error", subtitle_file);
+                    match err {
+                        SubtitleFileError::FileSystem(err) => {
+                            log::error!("{}", err);
+                            log::warn!("Skipping errored file: '{}'", subtitle_file);
+                        }
+                        SubtitleFileError::AlreadyRenamed => {
+                            log::warn!("Skipping already renamed file: '{}'", subtitle_file)
+                        }
+                        _ => {}
                     }
                     false
                 } else {

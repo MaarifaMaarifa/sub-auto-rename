@@ -9,6 +9,7 @@
 
 use anyhow::Result;
 use name_signature::{episode_name_signature_check, MatchSignature};
+use std::ffi::OsStr;
 use std::fs;
 use std::path;
 use thiserror::Error;
@@ -30,6 +31,13 @@ pub enum SubtitleFileError {
     /// in terms of their signature when trying to rename the subtitle file
     #[error("The movie file name and subtitle file name don't match in terms of their signatures")]
     MovieSubFileNamesMismatch,
+
+    /// This error is returned when a subtitle file has already been renamed thus not bothering
+    /// with issuing an unecessary rename system call.
+    /// One of the obvious scenario when this can happen is when a user reruns the program more than once
+    /// in the same directory
+    #[error("The subtitle file has already been renamed")]
+    AlreadyRenamed,
 
     /// This error is returned when a error is return by fs::rename() function
     #[error("There is an error related to the filesystem: (0)")]
@@ -57,6 +65,15 @@ impl SubtitleFile {
         ) {
             let mut new_subtitle_file_name = path::PathBuf::from(movie_file.get_path());
             new_subtitle_file_name.set_extension(SUBTITLE_FILE_EXTENSION);
+
+            if movie_file.get_path().file_stem().unwrap_or(OsStr::new(""))
+                == self
+                    .subtitle_file_path
+                    .file_stem()
+                    .unwrap_or(OsStr::new(""))
+            {
+                return Err(SubtitleFileError::AlreadyRenamed);
+            }
 
             if let Err(err) = fs::rename(&self.subtitle_file_path, new_subtitle_file_name) {
                 return Err(SubtitleFileError::FileSystem(err.to_string()));
