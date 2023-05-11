@@ -16,7 +16,7 @@ use thiserror::Error;
 mod name_signature;
 
 const SUBTITLE_FILE_EXTENSION: &str = "srt";
-const MOVIE_FILE_EXTENSIONS: &[&str] = &["mp4", "mkv"];
+const MOVIE_FILE_EXTENSIONS: &[&str] = &["mp4", "mkv", "flv", "avi", "3gp", "mov"];
 
 /// Error that can be returned when performing operations related to a subtitle file
 #[derive(Debug, Error)]
@@ -104,8 +104,8 @@ impl std::fmt::Display for SubtitleFile {
 #[derive(Debug, Error)]
 pub enum MovieFileError {
     /// This error is returned when trying to create a movie instance while the provided
-    /// path does not have a movie extension, that is .mp4 or .mkv
-    #[error("The movie name does not end with 'mkv' or 'mp4' extensions")]
+    /// path does not have a movie extension, that is .mp4 or .mkv etc
+    #[error("The movie name does not end with a valid movie extensions")]
     InvalidMovieFileName,
 }
 
