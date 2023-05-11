@@ -23,6 +23,8 @@ struct Cli {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
+    simple_logger::init()?;
+
     let mut movie_files = Vec::new();
     let mut subtitle_files = Vec::new();
 
@@ -62,7 +64,7 @@ fn main() -> Result<()> {
         for (index, subtitle_file) in subtitle_files.iter().enumerate() {
             if let Err(err) = subtitle_file.rename_using_movie_file(movie_file) {
                 if let SubtitleFileError::FileSystem(err) = err {
-                    bail!(err);
+                    log::error!("{}", err);
                 }
             } else {
                 println!("Renamed subtitle file {}", subtitle_file);
