@@ -15,6 +15,9 @@ use thiserror::Error;
 
 mod name_signature;
 
+const SUBTITLE_FILE_EXTENSION: &str = "srt";
+const MOVIE_FILE_EXTENSIONS: &[&str] = &["mp4", "mkv"];
+
 /// Error that can be returned when performing operations related to a subtitle file
 #[derive(Debug, Error)]
 pub enum SubtitleFileError {
@@ -52,14 +55,12 @@ impl SubtitleFile {
         &mut self,
         movie_file: &MovieFile,
     ) -> Result<(), SubtitleFileError> {
-        let movie_name = movie_file.get_path();
-        let subtitle_file_name = &self.subtitle_file_path;
-
-        if let MatchSignature::Match =
-            episode_name_signature_check(movie_name.as_os_str(), subtitle_file_name.as_os_str())
-        {
-            let mut new_subtitle_file_name = path::PathBuf::from(movie_name);
-            new_subtitle_file_name.set_extension("srt");
+        if let MatchSignature::Match = episode_name_signature_check(
+            movie_file.get_path().as_os_str(),
+            self.subtitle_file_path.as_os_str(),
+        ) {
+            let mut new_subtitle_file_name = path::PathBuf::from(movie_file.get_path());
+            new_subtitle_file_name.set_extension(SUBTITLE_FILE_EXTENSION);
 
             if let Err(err) = fs::rename(&self.subtitle_file_path, new_subtitle_file_name) {
                 return Err(SubtitleFileError::FileSystem(err.to_string()));
@@ -81,7 +82,7 @@ impl TryFrom<path::PathBuf> for SubtitleFile {
 
     fn try_from(value: path::PathBuf) -> std::result::Result<Self, Self::Error> {
         if let Some(extension) = value.extension() {
-            if extension == "srt" {
+            if extension == SUBTITLE_FILE_EXTENSION {
                 return Ok(Self {
                     subtitle_file_path: value,
                     renamed: false,
@@ -124,7 +125,7 @@ impl TryFrom<path::PathBuf> for MovieFile {
 
     fn try_from(value: path::PathBuf) -> std::result::Result<Self, Self::Error> {
         if let Some(extension) = value.extension() {
-            if extension == "mkv" || extension == "mp4" {
+            if MOVIE_FILE_EXTENSIONS.iter().any(|val| *val == extension) {
                 return Ok(Self(value));
             }
         }
