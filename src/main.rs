@@ -11,6 +11,9 @@ struct Cli {
     /// and their corresponding subtitle files
     episodes_subs_directory: path::PathBuf,
 
+    /// Extra movie extensions to include when checking movie files in a directory
+    extra_movie_extensions: Option<Vec<String>>,
+
     /// Whether to ignore the difference in the number of files between subtitle files
     /// and episodes files as the default behaviour expects them to be of equal amount.
     #[clap(short, long)]
@@ -30,7 +33,7 @@ fn main() -> Result<()> {
             continue;
         };
 
-        if let Ok(movie_file) = MovieFile::try_from(dir_entry.path()) {
+        if let Ok(movie_file) = MovieFile::new(dir_entry.path(), cli.extra_movie_extensions.as_ref()) {
             movie_files.push(movie_file);
             continue;
         };

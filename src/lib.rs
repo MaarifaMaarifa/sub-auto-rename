@@ -114,22 +114,40 @@ pub enum MovieFileError {
 pub struct MovieFile(path::PathBuf);
 
 impl MovieFile {
-    /// Returns the path of the MovieFile
-    fn get_path(&self) -> &path::Path {
-        &self.0
-    }
-}
-
-impl TryFrom<path::PathBuf> for MovieFile {
-    type Error = MovieFileError;
-
-    fn try_from(value: path::PathBuf) -> std::result::Result<Self, Self::Error> {
+    /// # Constructs a MovieFile
+    ///
+    /// This method takes an optional vec of extensions to include when constructing
+    /// the MoviesFile, otherwise when the argument is None it will default to the
+    /// built in extension
+    ///
+    /// # Errors
+    /// This method return an error when trying to construct a MovieFile with an
+    /// unknown extension.
+    pub fn new(
+        value: path::PathBuf,
+        extra_extensions: Option<&Vec<String>>,
+    ) -> Result<Self, MovieFileError> {
         if let Some(extension) = value.extension() {
+            // Checking the extra extensions first
+            if let Some(extra_extensions) = extra_extensions {
+                if extra_extensions
+                    .iter()
+                    .any(|val| *val == extension.to_string_lossy().to_string())
+                {
+                    return Ok(Self(value));
+                }
+            }
+            // Checking the default extensions when no extra extensions are provided
             if MOVIE_FILE_EXTENSIONS.iter().any(|val| *val == extension) {
                 return Ok(Self(value));
             }
         }
         Err(MovieFileError::InvalidMovieFileName)
+    }
+
+    /// Returns the path of the MovieFile
+    fn get_path(&self) -> &path::Path {
+        &self.0
     }
 }
 
@@ -137,5 +155,46 @@ impl std::fmt::Display for MovieFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let path_to_display = self.0.to_string_lossy();
         write!(f, "{}", path_to_display)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path;
+
+    use crate::MOVIE_FILE_EXTENSIONS;
+
+    use super::MovieFile;
+
+    #[test]
+    fn movie_file_creation_with_default_extension_test() {
+        let movie_paths: Vec<path::PathBuf> = MOVIE_FILE_EXTENSIONS
+            .iter()
+            .map(|ext| path::PathBuf::from(format!("mov.{}", ext)))
+            .collect();
+
+        let total_movie_files_created = movie_paths
+            .iter()
+            .take_while(|path| MovieFile::new(path.into(), None).is_ok())
+            .count();
+
+        assert_eq!(total_movie_files_created, movie_paths.len())
+    }
+
+    #[test]
+    fn movie_file_creation_with_extra_extension_test() {
+        let extra_extension: Vec<String> = ('a'..'z').map(|ext| ext.to_string()).collect();
+
+        let movie_paths: Vec<path::PathBuf> = extra_extension
+            .iter()
+            .map(|ext| path::PathBuf::from(format!("mov.{}", ext)))
+            .collect();
+
+        let total_movie_files_created = movie_paths
+            .iter()
+            .take_while(|path| MovieFile::new(path.into(), Some(&extra_extension)).is_ok())
+            .count();
+
+        assert_eq!(total_movie_files_created, movie_paths.len())
     }
 }
