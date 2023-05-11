@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use clap::Parser;
+use colored::*;
 use std::fs;
 use std::path;
 use sub_auto_rename::*;
@@ -68,7 +69,7 @@ fn main() -> Result<()> {
                     log::warn!("Skipping '{}' due to previous error", subtitle_file);
                 }
             } else {
-                println!("Renamed subtitle file {}", subtitle_file);
+                println!("{} Renamed subtitle file '{}'", "->".green(), subtitle_file);
                 subtitle_file_index_to_remove = Some(index);
                 break;
             }
@@ -81,8 +82,12 @@ fn main() -> Result<()> {
     }
 
     println!(
-        "Total subtitle files renamed: {}",
-        subtitle_files_before_rename - subtitle_files.len()
+        "{}",
+        format!(
+            "Total subtitle files renamed: {}",
+            subtitle_files_before_rename - subtitle_files.len()
+        )
+        .blue()
     );
 
     Ok(())
