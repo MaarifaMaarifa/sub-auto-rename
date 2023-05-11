@@ -16,6 +16,9 @@ Just dump all the videos and subtitles into one directory and give the program t
 # Typical use
 sub-auto-rename path/to/videos
 
+# Supplying extra extension (as default extensions supported are mp4, mkv, flv, avi, 3gp, mov)
+sub-auto-rename path/to/videos wmv yuv qt mpg webm   # extra extensions can be as many as you want
+
 # Ignoring the difference in the number of videos and subtitles in the provided directory
 sub-auto-rename -i path/to/videos
 

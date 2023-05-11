@@ -5,7 +5,7 @@ authors = ["Maarifa Maarifa"]
 categories = ['command-line-utilities', "movies", "tv", "subtitles"]
 repository = "https://github.com/sub-auto-rename"
 license = "MIT"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 [profile.release]
