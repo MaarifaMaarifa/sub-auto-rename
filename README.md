@@ -4,7 +4,7 @@ A program that automatically renames subtitle files to their corresponding movie
 
 ## Why this program exists
 
-Modern video players such as vlc and mpv automatically pick up a subtitle file that has the same name as the movie that is being played. Sometimes you might have alot of videos that have their subtitle files with sightly different names which means you have to use your players settings to point which file to use or rename all the files manually which is tideous. This is where **sub-auto-rename** becomes handy.
+Modern video players such as vlc and mpv automatically pick up a subtitle file that has the same name as the movie that is being played. Sometimes you might have alot of videos that have their subtitle files with slightly different names which means you have to use your video player's settings to point which file to use or rename all the files manually which is tideous. This is where **sub-auto-rename** becomes in handy.
 The program will look through all videos and subtitle files in the directory, identify which subtitle file points to which movie file and automatically rename the subtitle files to the same names as their corresponding movies saving time if all of this work could be performed manually.
 
 ## How to use
