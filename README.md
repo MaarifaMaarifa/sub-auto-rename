@@ -28,6 +28,11 @@ sub-auto-rename --help
 
 ## Installation
 
+### Getting pre-built binaries
+Pre-built binaries for your specific platform can be obtained in the [release page](https://github.com/MaarifaMaarifa/sub-auto-rename/releases)
+
+### Building from source
+
 **sub-auto-rename** can be installed via the following shell commands assuming you have cargo, rustc and git set up on your machine. You can check the [guide](https://rustup.rs/) incase you're not setup.
 
 ```shell
