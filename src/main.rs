@@ -126,8 +126,9 @@ fn main() -> Result<()> {
     println!(
         "\n{}",
         format!(
-            "Total subtitle files renamed: {}",
-            subtitle_files_before_rename - subtitle_files.len()
+            "Renamed subtitle files : {}, Non-renamed subtitle files: {}",
+            format!("{}", subtitle_files_before_rename - subtitle_files.len()).green(),
+            format!("{}", subtitle_files.len()).red()
         )
         .blue()
     );
