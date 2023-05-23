@@ -22,6 +22,9 @@ sub-auto-rename path/to/videos wmv yuv qt mpg webm   # extra extensions can be a
 # Ignoring the difference in the number of videos and subtitles in the provided directory
 sub-auto-rename -i path/to/videos
 
+# Getting the summary of rename and non-renamed subtitle files after rename operation has completed.
+sub-auto-rename -s path/to/videos
+
 # Getting help information
 sub-auto-rename --help
 ```
