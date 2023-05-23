@@ -30,10 +30,12 @@ fn main() -> Result<()> {
     let mut subtitle_files = Vec::new();
 
     for dir_entry in fs::read_dir(cli.episodes_subs_directory)? {
-        let dir_entry = if let Ok(dir_entry) = dir_entry {
-            dir_entry
-        } else {
-            continue;
+        let dir_entry = match dir_entry {
+            Ok(dir_entry) => dir_entry,
+            Err(err) => {
+                log::error!("Error reading a directory entry: {}", err);
+                continue;
+            }
         };
 
         if let Some(movie_file) =
