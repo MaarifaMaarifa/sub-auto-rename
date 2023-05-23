@@ -19,6 +19,10 @@ struct Cli {
     /// and episodes files as the default behaviour expects them to be of equal amount.
     #[clap(short, long)]
     ignore_number_difference: bool,
+
+    /// Whether to get a summary of renamed and non-renamed subtitle files after rename completes.
+    #[clap(short, long)]
+    summarize: bool,
 }
 
 fn main() -> Result<()> {
@@ -60,6 +64,8 @@ fn main() -> Result<()> {
 
     let subtitle_files_before_rename = subtitle_files.len();
 
+    let mut renamed_subtitle_files = Vec::new();
+
     // keeping track of what subtitle file to remove from the vec after being renamed for efficiency
     let mut subtitle_file_index_to_remove: Option<usize> = None;
 
@@ -88,13 +94,37 @@ fn main() -> Result<()> {
             });
 
         if let Some(index) = subtitle_file_index_to_remove {
-            subtitle_files.swap_remove(index);
+            let subtitle_file = subtitle_files.swap_remove(index);
+            if cli.summarize {
+                renamed_subtitle_files.push(subtitle_file);
+            }
             subtitle_file_index_to_remove = None;
         }
     });
 
+    if cli.summarize {
+        println!("\n-------------- SUMMARY --------------");
+        println!("{}", ":: Renamed subtitle files".blue());
+        if renamed_subtitle_files.is_empty() {
+            println!("Nothing.");
+        } else {
+            for sub in renamed_subtitle_files {
+                println!("- {}", format!("{}", sub).green());
+            }
+        }
+
+        println!("\n{}", ":: Non renamed subtitle files".blue());
+        if subtitle_files.is_empty() {
+            println!("Nothing.");
+        } else {
+            for sub in &subtitle_files {
+                println!("- {}", format!("{}", sub).red());
+            }
+        }
+    }
+
     println!(
-        "{}",
+        "\n{}",
         format!(
             "Total subtitle files renamed: {}",
             subtitle_files_before_rename - subtitle_files.len()
